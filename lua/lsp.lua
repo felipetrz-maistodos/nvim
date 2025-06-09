@@ -19,16 +19,19 @@ vim.keymap.set('n', '<leader>a', '<nop>')
 vim.api.nvim_create_autocmd('LspAttach', {
     callback = function(ev)
         local client = vim.lsp.get_client_by_id(ev.data.client_id)
-        if client:supports_method('textDocument/formatting') then
-            local function format()
+        local function format()
+            if client:supports_method('textDocument/formatting') then
                 vim.lsp.buf.format({ async = false })
+            end
+            if client:supports_method('textDocument/codeAction') then
                 vim.lsp.buf.code_action({
                     context = { only = { 'source.organizeImports' } },
                     apply = true,
                 })
             end
-            vim.keymap.set({ 'n', 'x' }, '<c-f>', format, { silent = true })
         end
+        vim.keymap.set({ 'n', 'x' }, '<c-f>', format, { silent = true })
+
         if client:supports_method('textDocument/completion') then
             vim.lsp.completion.enable(true, client.id, ev.buf, { autotrigger = false })
         end
